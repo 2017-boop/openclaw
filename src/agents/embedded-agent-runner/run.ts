@@ -245,7 +245,7 @@ const COMPACTION_CONTINUATION_RETRY_INSTRUCTION =
 const NO_REAL_CONVERSATION_MESSAGES_REASON = "no real conversation messages";
 const BEFORE_AGENT_FINALIZE_RETRY_PROMPT_PREFIX =
   "Before accepting the previous final answer, apply this revision request and produce the revised final answer. Do not repeat completed work or rerun tools unless the request explicitly requires it.";
-const MAX_BEFORE_AGENT_FINALIZE_REVISIONS = 3;
+const MAX_BEFORE_AGENT_FINALIZE_REVISIONS = 10; //3
 type EmbeddedRunAttemptForRunner = Awaited<ReturnType<typeof runEmbeddedAttemptWithBackend>>;
 
 function isNoRealConversationCompactionNoop(params: {
