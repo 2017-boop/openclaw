@@ -1,4 +1,4 @@
-export const MAX_BEFORE_AGENT_FINALIZE_REVISIONS = 3;
+export const MAX_BEFORE_AGENT_FINALIZE_REVISIONS = 10; // was 3
 
 export type EmbeddedRunTerminalRetryState = {
   reasoningOnlyAttempts: number;

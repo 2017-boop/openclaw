@@ -19,7 +19,7 @@ import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
  * gateway is restarted. See #70133.
  */
 
-const DEFAULT_TASK_TIMEOUT_MS = 5 * 60 * 1000;
+const DEFAULT_TASK_TIMEOUT_MS = 30 * 60 * 1000; // default 5 minutes
 
 interface SequentialQueueOptions {
   /**
