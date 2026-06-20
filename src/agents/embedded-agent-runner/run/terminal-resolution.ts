@@ -55,8 +55,8 @@ import type { EmbeddedRunAttemptResult } from "./types.js";
 const MAX_MISSING_ASSISTANT_RETRIES = 1;
 const COMPACTION_CONTINUATION_RETRY_INSTRUCTION =
   "The previous attempt compacted the conversation context before producing a final user-visible answer. Continue from the compacted transcript and produce the final answer now. Do not restart from scratch, do not repeat completed work, and do not rerun tools unless the transcript clearly lacks required evidence.";
-const BEFORE_AGENT_FINALIZE_RETRY_PROMPT_PREFIX =
-  "Before accepting the previous final answer, apply this revision request and produce the revised final answer. Do not repeat completed work or rerun tools unless the request explicitly requires it.";
+const BEFORE_AGENT_FINALIZE_RETRY_PROMPT_PREFIX = "";
+// "Before accepting the previous final answer, apply this revision request and produce the revised final answer. Do not repeat completed work or rerun tools unless the request explicitly requires it.";
 
 type TerminalPresentationObservation = {
   terminalPresentation?: string;

@@ -308,7 +308,7 @@ export function handleAgentEnd(
       hasAssistantVisibleText,
       isError,
       incompleteTerminalAssistant,
-      hadDeterministicSideEffect: hadBeforeFinalizeSideEffect,
+      hadDeterministicSideEffect: false, //hadBeforeFinalizeSideEffect,
     });
     if (isPromiseLike<void | { suppressTerminalDelivery?: boolean }>(result)) {
       return result;
