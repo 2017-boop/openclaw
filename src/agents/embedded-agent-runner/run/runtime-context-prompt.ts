@@ -89,8 +89,8 @@ export function resolveRuntimeContextPromptParts(params: {
       : shouldExtractInternalRuntimeContext
         ? extractInternalRuntimeContext(params.modelPrompt)
         : { text: params.modelPrompt };
-  const modelPromptText = modelPrompt?.text ?? transcriptPrompt ?? extracted.text;
-  const prompt = transcriptPrompt ?? extracted.text;
+  const modelPromptText = modelPrompt?.text ?? (extracted.text || transcriptPrompt);
+  const prompt = extracted.text ?? transcriptPrompt;
   if (!prompt.trim() && params.emptyTranscriptMode === "model-prompt") {
     return {
       prompt: extracted.text,
