@@ -593,6 +593,19 @@ function isShellReferenceToKey(key: string, value: string): boolean {
   return braced?.[1] === key;
 }
 
+// Matches pure shell variable references WITHOUT literal fallback values:
+//   $VAR, ${VAR}, ${VAR:-}, ${VAR:+alt}
+// Does NOT match ${VAR:-literal} where "literal" is a non-empty default value —
+// that literal may itself be a secret that needs redaction.
+// Used to prevent redaction of shell variable references in command strings,
+// where redacting `$API_KEY` to `$API_…EY` would corrupt the command.
+const SHELL_VARIABLE_REFERENCE_RE =
+  /^\$(?:\{[A-Za-z_][A-Za-z0-9_]*(?::[-=?+])?\}|[A-Za-z_][A-Za-z0-9_]*)$/;
+
+function isShellVariableReference(value: string): boolean {
+  return SHELL_VARIABLE_REFERENCE_RE.test(value);
+}
+
 function readEnvAssignmentKey(match: string): string | undefined {
   return match.match(/\b([A-Z_][A-Z0-9_]*)\b\s*[=:]/)?.[1];
 }
@@ -710,6 +723,21 @@ function redactMatch(
   if (
     isShellReferencePattern &&
     (shouldPreserveShellReferenceMatch(match, token) || isEmptyShellParameterExpansionTail(token))
+  ) {
+    return match;
+  }
+  // For non-assignment header-style patterns (e.g. `apikey: $VAR`, `Authorization: $TOKEN`),
+  // preserve pure shell variable references. These patterns capture the VALUE portion after
+  // a header key or label; a bare `$VAR` or `${VAR}` there is a runtime expansion, not a
+  // literal secret. Redacting it (e.g. `$API_KEY` → `$API_…EY`) corrupts commands when the
+  // redacted text feeds back into the model's context (via tool summaries), causing subsequent
+  // commands to reference nonexistent variable names.
+  // Assignment-like matches (containing `=`) are excluded — they have their own key-matching
+  // logic above or fall through to standard redaction for non-self-referencing values.
+  if (
+    !isShellReferencePattern &&
+    !match.includes("=") &&
+    isShellVariableReference(formAwareValue.secret)
   ) {
     return match;
   }
