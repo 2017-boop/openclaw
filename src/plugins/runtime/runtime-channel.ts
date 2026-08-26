@@ -90,6 +90,21 @@ export function createRuntimeChannel(options?: {
         ? { dispatchReplyFromConfig: options.dispatchReplyFromConfig }
         : {}),
     });
+  const runInbound: typeof runChannelTurn = options?.dispatchReplyFromConfig
+    ? (params) => {
+        const wrappedAdapter = {
+          ...params.adapter,
+          resolveTurn: async (...args: Parameters<typeof params.adapter.resolveTurn>) => {
+            const turn = await params.adapter.resolveTurn(...args);
+            if (turn && typeof turn === "object" && !("runDispatch" in turn)) {
+              return { ...turn, dispatchReplyFromConfig: options.dispatchReplyFromConfig };
+            }
+            return turn;
+          },
+        };
+        return runChannelTurn({ ...params, adapter: wrappedAdapter });
+      }
+    : runChannelTurn;
   const sessionRuntime = {
     resolveStorePath: resolveSessionStorePathCore,
     readSessionUpdatedAt: readSessionUpdatedAtCore,
@@ -195,7 +210,7 @@ export function createRuntimeChannel(options?: {
     },
     inbound: {
       buildContext: buildChannelInboundEventContext,
-      run: runChannelTurn,
+      run: runInbound,
       runPreparedReply: runPreparedChannelTurn,
       dispatch: dispatchInbound,
       dispatchReply: dispatchAssembledChannelTurn,
