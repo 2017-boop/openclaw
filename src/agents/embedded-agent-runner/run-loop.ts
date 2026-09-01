@@ -667,6 +667,10 @@ export async function runPreparedEmbeddedLoop(
         contextRecoveryState,
       });
       if (terminalResolution.action === "retry") {
+        // Terminal retries may follow transcript mutations (revise rewind,
+        // compaction) that invalidate the projection. Mark so the next
+        // attempt waits for the projection to rebuild before reading it.
+        sessionPromptState.markOwnedTranscriptRetry();
         continue;
       }
       return terminalResolution.result;
