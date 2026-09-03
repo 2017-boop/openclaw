@@ -383,7 +383,7 @@ export async function sendSubagentAnnounceDirectly(params: {
                     idempotencyKey: params.directIdempotencyKey,
                   }
                 : undefined,
-            expectFinal: true,
+            expectFinal: params.expectsCompletionMessage,
             timeoutMs: announceTimeoutMs,
             resolveGatewayContext: params.resolveGatewayContext,
           });
