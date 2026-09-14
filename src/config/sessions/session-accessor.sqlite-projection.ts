@@ -81,7 +81,10 @@ import {
   runExclusiveSqliteSessionWrite,
   toDatabaseOptions,
 } from "./session-accessor.sqlite-scope.js";
-import { appendTranscriptEventsInTransaction } from "./session-accessor.sqlite-transcript-store.js";
+import {
+  appendTranscriptEventsInTransaction,
+  ensureTranscriptHeader,
+} from "./session-accessor.sqlite-transcript-store.js";
 import { buildSessionResetBoundaryEvent } from "./session-reset-boundary-event.js";
 import { resolveMaintenanceConfig } from "./store-maintenance-runtime.js";
 import type { ResolvedSessionMaintenanceConfig } from "./store-maintenance.js";
@@ -394,6 +397,12 @@ export async function applySessionEntryLifecycleMutation(params: {
           throw new Error(`SQLite session entry has stale lifecycle state for ${sessionKey}`);
         }
         if (resetBoundary && expectedEntry?.sessionId) {
+          // Ensure transcript has a session header before appending reset boundary.
+          ensureTranscriptHeader(
+            transactionDb,
+            { ...resolved, sessionId: expectedEntry.sessionId, sessionKey },
+            process.cwd(),
+          );
           const event = buildSessionResetBoundaryEvent({
             events: loadTranscriptEventsFromDatabase(transactionDb, expectedEntry.sessionId),
             ...resetBoundary,

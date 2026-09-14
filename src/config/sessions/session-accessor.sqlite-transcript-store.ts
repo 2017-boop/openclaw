@@ -255,16 +255,23 @@ export function ensureTranscriptHeader(
   cwd: string | undefined,
 ): void {
   const db = getSessionKysely(database.db);
-  const existing = executeSqliteQueryTakeFirstSync(
+  // Check if the first event is a session header.
+  // We cannot just check if any events exist, because reset boundary events
+  // may have been appended before the header (e.g., via applySessionEntryLifecycleMutation).
+  const firstEvent = executeSqliteQueryTakeFirstSync(
     database.db,
     db
       .selectFrom("transcript_events")
-      .select("seq")
+      .select(["seq", "event_json"])
       .where("session_id", "=", scope.sessionId)
+      .orderBy("seq", "asc")
       .limit(1),
   );
-  if (existing) {
-    return;
+  if (firstEvent) {
+    const parsed = JSON.parse(firstEvent.event_json) as { type?: string };
+    if (parsed.type === "session") {
+      return;
+    }
   }
   appendTranscriptEventInTransaction(
     database,
